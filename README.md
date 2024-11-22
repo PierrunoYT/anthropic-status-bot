@@ -16,6 +16,31 @@ A Discord bot that monitors Anthropic's status page and provides real-time updat
 - Discord Bot Token
 - Discord Channel ID
 
+## Required Bot Permissions
+
+The bot requires the following Discord permissions and intents:
+
+### Intents
+- Message Content Intent (Privileged Intent)
+- Default Intents
+
+### Bot Permissions
+- Read Messages/View Channels
+- Send Messages
+- Edit Messages
+- Embed Links
+- Read Message History
+
+To set up these permissions:
+1. Go to the Discord Developer Portal
+2. Select your application
+3. Navigate to the "Bot" section
+4. Enable "Message Content Intent" under Privileged Gateway Intents
+5. In the OAuth2 URL Generator:
+   - Select "bot" scope
+   - Select the required permissions listed above
+   - Use the generated URL to invite the bot to your server
+
 ## Installation
 
 1. Clone the repository:

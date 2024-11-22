@@ -75,10 +75,15 @@ class StatusBot(commands.Bot):
                 await channel.send(embed=create_incident_embed(update['incident']))
                 logger.info("Sent new incident notification")
 
-    async def handle_status_update(self, current_state: dict, updates: Optional[list]):
+    async def handle_status_update(self, current_state: Optional[dict], updates: Optional[list]):
         """Handle status updates and send notifications."""
         try:
             logger.info("Handling status update")
+            
+            if not current_state:
+                logger.error("Cannot handle status update: current_state is None")
+                return
+                
             channel = await self.fetch_channel(int(config.discord.channel_id))
             
             if not channel:
@@ -99,9 +104,14 @@ class StatusBot(commands.Bot):
             try:
                 updates = await self.status_checker.check_for_updates()
                 current_state = self.status_checker.get_current_state()
+                
+                if not current_state:
+                    logger.error("Failed to fetch current state")
+                    return
+                    
                 await self.handle_status_update(current_state, updates)
             except Exception as e:
-                logger.error(f"Error checking status: {str(e)}")
+                logger.error(f"Error checking status: {str(e)}", exc_info=True)
 
         logger.info(
             "Setting up status monitoring",

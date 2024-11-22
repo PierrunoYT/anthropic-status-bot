@@ -49,26 +49,50 @@ class StatusChecker:
                 async with session.get(
                     config.status.url,
                     headers=headers,
-                    timeout=aiohttp.ClientTimeout(total=config.status.timeout / 1000)
+                    timeout=aiohttp.ClientTimeout(total=config.status.timeout)
                 ) as response:
                     duration = (datetime.now() - start_time).total_seconds() * 1000
                     logging.info(f"GET {config.status.url} - {response.status} - {duration:.0f}ms")
                     
                     if response.status != 200:
+                        logging.error(f"Failed to fetch status page. Status code: {response.status}")
                         return None
                     
                     html = await response.text()
+                    
+                    if not html.strip():
+                        logging.error("Received empty response from status page")
+                        return None
+                        
                     soup = BeautifulSoup(html, 'html.parser')
                     
-                    return {
-                        'overall': self._parse_overall_status(soup),
-                        'components': self._parse_components(soup),
-                        'incidents': self._parse_incidents(soup),
-                        'timestamp': datetime.utcnow().isoformat()
-                    }
+                    try:
+                        status_data = {
+                            'overall': self._parse_overall_status(soup),
+                            'components': self._parse_components(soup),
+                            'incidents': self._parse_incidents(soup),
+                            'timestamp': datetime.utcnow().isoformat()
+                        }
+                        
+                        # Validate parsed data
+                        if not status_data['overall'] or not status_data['components']:
+                            logging.error("Failed to parse critical status information")
+                            return None
+                            
+                        return status_data
+                        
+                    except Exception as parse_error:
+                        logging.error(f"Error parsing status page: {str(parse_error)}")
+                        return None
                     
+            except asyncio.TimeoutError:
+                logging.error(f"Timeout while fetching status page (timeout: {config.status.timeout}s)")
+                return None
+            except aiohttp.ClientError as e:
+                logging.error(f"Network error while fetching status page: {str(e)}")
+                return None
             except Exception as e:
-                logging.error(f"Error fetching status: {str(e)}")
+                logging.error(f"Unexpected error fetching status: {str(e)}", exc_info=True)
                 return None
 
     def _parse_overall_status(self, soup: BeautifulSoup) -> Dict[str, str]:

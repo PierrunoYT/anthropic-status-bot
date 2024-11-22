@@ -3,37 +3,57 @@ from datetime import datetime
 from typing import Dict, Any, List
 
 STATUS_COLORS = {
-    'operational': Colour.green(),
-    'degraded': Colour.gold(),
-    'outage': Colour.red(),
-    'maintenance': Colour.blue(),
-    'default': Colour.light_grey()
+    'operational': Colour.from_rgb(40, 167, 69),  # Brighter green
+    'degraded': Colour.from_rgb(255, 193, 7),     # Warmer yellow
+    'outage': Colour.from_rgb(220, 53, 69),       # Brighter red
+    'maintenance': Colour.from_rgb(0, 123, 255),   # Brighter blue
+    'default': Colour.from_rgb(108, 117, 125)     # Darker grey
+}
+
+STATUS_EMOJIS = {
+    'operational': '🟢',
+    'degraded': '🟡',
+    'outage': '🔴',
+    'maintenance': '🔵',
+    'default': '⚪'
 }
 
 def format_name(name: str) -> str:
-    """Format component name."""
-    return name.lower().replace('- beta features', ' (beta)')
+    """Format component name with proper capitalization."""
+    name = name.replace('- beta features', ' (beta)')
+    return ' '.join(word.capitalize() for word in name.split())
 
 def format_status(status: str) -> str:
-    """Format status text."""
-    return status.lower()
+    """Format status text with proper capitalization."""
+    return status.capitalize()
 
-def get_status_dot(status: str) -> str:
-    """Get status indicator dot."""
-    return '●' if any(s in status.lower() for s in ['operational', 'maintenance', 'resolved']) else '○'
+def get_status_indicator(status: str) -> str:
+    """Get status indicator emoji."""
+    status_lower = status.lower()
+    if 'operational' in status_lower:
+        return STATUS_EMOJIS['operational']
+    elif 'maintenance' in status_lower:
+        return STATUS_EMOJIS['maintenance']
+    elif 'resolved' in status_lower:
+        return STATUS_EMOJIS['operational']
+    elif 'degraded' in status_lower:
+        return STATUS_EMOJIS['degraded']
+    elif 'outage' in status_lower:
+        return STATUS_EMOJIS['outage']
+    return STATUS_EMOJIS['default']
 
 def create_status_embed(status: Dict[str, Any]) -> Embed:
     """Create status embed message."""
     embed = Embed(
-        title='anthropic status',
-        description=f"{get_status_dot(status['overall']['level'])} {format_status(status['overall']['description'])}",
+        title='🌟 Anthropic Status',
+        description=f"{get_status_indicator(status['overall']['level'])} **{format_status(status['overall']['description'])}**",
         colour=STATUS_COLORS.get(status['overall']['level'], STATUS_COLORS['default']),
         timestamp=datetime.utcnow()
     )
 
     # Add components status
     component_status = '\n'.join(
-        f"{get_status_dot(data['status'])} {format_name(name)} · {format_status(data['status'])}"
+        f"{get_status_indicator(data['status'])} **{format_name(name)}**\n┗━ {format_status(data['status'])}"
         for name, data in status['components'].items()
     )
 
@@ -51,37 +71,39 @@ def create_status_embed(status: Dict[str, Any]) -> Embed:
 
     if active_incidents:
         incidents_list = '\n\n'.join(
-            f"{get_status_dot(i['status'])} {format_status(i['name'])}\n    status: {format_status(i['status'])}"
+            f"{get_status_indicator(i['status'])} **{format_status(i['name'])}**\n┗━ Status: {format_status(i['status'])}"
             for i in active_incidents
         )
-        embed.add_field(name='active incidents', value=incidents_list, inline=False)
+        embed.add_field(name='🚨 Active Incidents', value=incidents_list, inline=False)
 
-    embed.set_footer(text='last updated')
+    # Add divider before footer
+    embed.add_field(name='', value='━━━━━━━━━━━━━━━', inline=False)
+    embed.set_footer(text='Last Updated')
     return embed
 
 def create_incident_embed(incident: Dict[str, Any]) -> Embed:
     """Create incident embed message."""
     embed = Embed(
-        title=format_status(incident['name']),
+        title=f"🚨 {format_status(incident['name'])}",
         colour=STATUS_COLORS.get(incident['impact'], STATUS_COLORS['default']),
         timestamp=datetime.utcnow()
     )
 
     # Set description with impact and status
     embed.description = (
-        f"impact: {format_status(incident['impact'])}\n"
-        f"{get_status_dot(incident['status'])} status: {format_status(incident['status'])}\n\n"
-        f"timeline:"
+        f"**Impact**: {format_status(incident['impact'])}\n"
+        f"{get_status_indicator(incident['status'])} **Status**: {format_status(incident['status'])}\n\n"
+        f"📅 **Timeline**:"
     )
 
     # Add updates if available
     if incident.get('updates'):
         updates_text = '\n\n'.join(
-            f"{get_status_dot(update['status'])} {format_status(update['status'])}  ·  "
-            f"{datetime.fromisoformat(update['timestamp'].replace('Z', '+00:00')).strftime('%Y-%m-%d %H:%M:%S UTC')}\n"
-            f"    {format_status(update['message'])}"
+            f"{get_status_indicator(update['status'])} **{format_status(update['status'])}**\n"
+            f"┣━ 🕒 {datetime.fromisoformat(update['timestamp'].replace('Z', '+00:00')).strftime('%B %d, %Y at %H:%M UTC')}\n"
+            f"┗━ {format_status(update['message'])}"
             for update in incident['updates']
         )
-        embed.add_field(name='updates', value=updates_text, inline=False)
+        embed.add_field(name='📝 Updates', value=updates_text, inline=False)
 
     return embed

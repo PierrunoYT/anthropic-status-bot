@@ -31,13 +31,15 @@ class StatusBot(commands.Bot):
             send_messages=True,
             manage_messages=True,
             embed_links=True,
-            read_message_history=True
+            read_message_history=True,
+            manage_channels=True
         )
         
         super().__init__(command_prefix="!", intents=intents)
         
         self.status_checker = StatusChecker()
         self.status_message_id: Optional[int] = None
+        self.last_status: Optional[dict] = None
         self.scheduler = AsyncIOScheduler()
         self.required_permissions = [
             'view_channel',
@@ -61,7 +63,7 @@ class StatusBot(commands.Bot):
             logger.error(f"Error in {event}", exc_info=sys.exc_info())
 
     async def update_status_message(self, channel: discord.TextChannel, current_state: dict):
-        """Update or create status message."""
+        """Update or create status message and send notifications for changes."""
         status_embed = create_status_embed(current_state)
         
         # Check bot permissions in the channel
@@ -80,21 +82,50 @@ class StatusBot(commands.Bot):
         if missing_permissions:
             logger.error(f"Missing required permissions in channel {channel.name}: {', '.join(missing_permissions)}")
             return
+
+        # Check for significant status changes
+        should_notify = False
+        if self.last_status is not None:
+            # Check if overall status changed
+            if current_state['overall']['level'] != self.last_status['overall']['level']:
+                should_notify = True
             
+            # Check if any component status changed
+            for name, data in current_state['components'].items():
+                if (name not in self.last_status['components'] or 
+                    data['status'] != self.last_status['components'][name]['status']):
+                    should_notify = True
+                    break
+
+        # Update the pinned status message
         try:
             if self.status_message_id:
                 try:
                     status_message = await channel.fetch_message(self.status_message_id)
                     await status_message.edit(embed=status_embed)
+                    if not status_message.pinned:
+                        await status_message.pin()
                     logger.info("Status monitor message updated")
                 except discord.NotFound:
                     logger.warning("Could not find status message, creating new one")
                     new_message = await channel.send(embed=status_embed)
+                    await new_message.pin()
                     self.status_message_id = new_message.id
             else:
                 new_message = await channel.send(embed=status_embed)
+                await new_message.pin()
                 self.status_message_id = new_message.id
                 logger.info(f"Created status monitor message: {self.status_message_id}")
+
+            # Send notification for significant changes
+            if should_notify:
+                notification_embed = status_embed.copy()
+                notification_embed.title = "🔔 Status Change Alert"
+                await channel.send(embed=notification_embed)
+                logger.info("Sent status change notification")
+
+            # Update last known status
+            self.last_status = current_state
         except Exception as e:
             logger.error(f"Error updating status message: {str(e)}")
             new_message = await channel.send(embed=status_embed)
@@ -136,6 +167,15 @@ class StatusBot(commands.Bot):
             if not isinstance(channel, discord.TextChannel):
                 logger.error(f"Channel {config.discord.channel_id} is not a text channel")
                 return
+
+            # Clean up old pinned messages except the most recent status message
+            try:
+                pins = await channel.pins()
+                for pin in pins:
+                    if pin.id != self.status_message_id:
+                        await pin.unpin()
+            except Exception as e:
+                logger.error(f"Error cleaning up pins: {str(e)}")
 
             await self.update_status_message(channel, current_state)
             

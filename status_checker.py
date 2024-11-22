@@ -101,9 +101,26 @@ class StatusChecker:
         status_elem = soup.select_one(selectors['status'])
         description_elem = soup.select_one(selectors['description'])
         
+        # Check component statuses to determine overall status
+        components = self._parse_components(soup)
+        has_degraded = any(comp.get('status', '').lower() == 'degraded performance' 
+                          for comp in components.values())
+        has_outage = any(comp.get('status', '').lower() == 'outage' 
+                        for comp in components.values())
+        
+        if has_outage:
+            status = 'System Outage'
+            level = 'outage'
+        elif has_degraded:
+            status = 'Degraded Performance'
+            level = 'degraded'
+        else:
+            status = description_elem.text.strip() if description_elem else 'All Systems Operational'
+            level = self._determine_status_level(status_elem.get('class', []) if status_elem else [])
+            
         return {
-            'description': description_elem.text.strip() if description_elem else 'All Systems Operational',
-            'level': self._determine_status_level(status_elem.get('class', []) if status_elem else [])
+            'description': status,
+            'level': level
         }
 
     def _determine_status_level(self, status_classes: List[str]) -> str:

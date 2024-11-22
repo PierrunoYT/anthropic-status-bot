@@ -14,7 +14,8 @@ class StatusConfig(BaseModel):
         "console.anthropic.com",
         "api.anthropic.com",
         "api.anthropic.com - Beta Features",
-        "anthropic.com"
+        "anthropic.com",
+        "claude.ai"
     ]
     user_agent: str = "StatusChecker/1.0"
 

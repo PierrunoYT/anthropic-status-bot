@@ -23,11 +23,23 @@ class StatusBot(commands.Bot):
     def __init__(self):
         intents = discord.Intents.default()
         intents.message_content = True
+        intents.guild_messages = True
+        
+        permissions = discord.Permissions()
+        permissions.update(
+            view_channel=True,
+            send_messages=True,
+            embed_links=True,
+            read_message_history=True,
+            manage_messages=True
+        )
+        
         super().__init__(command_prefix="!", intents=intents)
         
         self.status_checker = StatusChecker()
         self.status_message_id: Optional[int] = None
         self.scheduler = AsyncIOScheduler()
+        self.required_permissions = permissions
         
         # Register event handlers
         self.setup_events()
@@ -46,6 +58,19 @@ class StatusBot(commands.Bot):
         """Update or create status message."""
         status_embed = create_status_embed(current_state)
         
+        # Check bot permissions in the channel
+        bot_member = channel.guild.get_member(self.user.id)
+        channel_permissions = channel.permissions_for(bot_member)
+        
+        missing_permissions = []
+        for perm, required in self.required_permissions:
+            if required and not getattr(channel_permissions, perm, False):
+                missing_permissions.append(perm)
+        
+        if missing_permissions:
+            logger.error(f"Missing required permissions in channel {channel.name}: {', '.join(missing_permissions)}")
+            return
+            
         try:
             if self.status_message_id:
                 try:
@@ -84,10 +109,22 @@ class StatusBot(commands.Bot):
                 logger.error("Cannot handle status update: current_state is None")
                 return
                 
-            channel = await self.fetch_channel(int(config.discord.channel_id))
+            try:
+                channel = await self.fetch_channel(int(config.discord.channel_id))
+            except discord.Forbidden:
+                logger.error("Bot does not have permission to access the channel")
+                return
+            except discord.NotFound:
+                logger.error(f"Could not find channel: {config.discord.channel_id}")
+                return
             
             if not channel:
                 logger.error(f"Could not find channel: {config.discord.channel_id}")
+                return
+                
+            # Verify channel type
+            if not isinstance(channel, discord.TextChannel):
+                logger.error(f"Channel {config.discord.channel_id} is not a text channel")
                 return
 
             await self.update_status_message(channel, current_state)

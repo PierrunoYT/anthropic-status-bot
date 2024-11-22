@@ -30,6 +30,7 @@ The bot requires the following Discord permissions and intents:
 - Edit Messages
 - Embed Links
 - Read Message History
+- Manage Messages (required for updating status messages)
 
 To set up these permissions:
 1. Go to the Discord Developer Portal
@@ -86,6 +87,44 @@ The bot will:
 - `DISCORD_CHANNEL_ID`: The ID of the channel where updates will be posted
 - `CHECK_INTERVAL`: How often to check for updates (in minutes)
 - `LOG_LEVEL`: Logging level (none, debug, info, warn, error)
+
+## Troubleshooting
+
+### Permission Issues
+
+If you see "403 Forbidden: Missing Permissions" errors in the logs:
+
+1. Verify Bot Permissions:
+   - Go to your Discord server settings
+   - Click on "Roles"
+   - Find your bot's role
+   - Ensure all required permissions are enabled:
+     * View Channels
+     * Send Messages
+     * Embed Links
+     * Read Message History
+     * Manage Messages
+
+2. Check Channel Permissions:
+   - Right-click the channel where the bot posts updates
+   - Click "Edit Channel"
+   - Go to "Permissions"
+   - Find your bot's role
+   - Ensure all required permissions are enabled for that channel
+
+3. Bot Role Position:
+   - In server settings under "Roles"
+   - Make sure the bot's role is positioned high enough to have permission to manage messages
+   - Drag the bot's role above any roles it needs to manage
+
+4. Channel Type:
+   - Ensure the configured channel is a text channel
+   - The bot cannot post updates in voice channels, forums, or announcement channels
+
+If issues persist:
+1. Remove the bot from your server
+2. Generate a new invite link with all required permissions
+3. Reinvite the bot using the new link
 
 ## License
 

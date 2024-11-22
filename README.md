@@ -25,13 +25,14 @@ The bot requires the following Discord permissions and intents:
 - Default Intents
 
 ### Bot Permissions
-- Read Messages/View Channels
-- Send Messages
-- Edit Messages
-- Embed Links
-- Read Message History
-- Manage Messages (required for updating status messages)
+The bot requires the following specific permissions:
+- View Channels (to see the channel)
+- Send Messages (to post status updates)
+- Manage Messages (to edit status messages)
+- Embed Links (to send rich embeds)
+- Read Message History (to update existing messages)
 
+Permissions Integer: 68608
 To set up these permissions:
 1. Go to the Discord Developer Portal
 2. Select your application
@@ -98,12 +99,13 @@ If you see "403 Forbidden: Missing Permissions" errors in the logs:
    - Go to your Discord server settings
    - Click on "Roles"
    - Find your bot's role
-   - Ensure all required permissions are enabled:
+   - Enable exactly these permissions:
      * View Channels
      * Send Messages
+     * Manage Messages
      * Embed Links
      * Read Message History
-     * Manage Messages
+   - Or use this permissions integer in the OAuth2 URL: 68608
 
 2. Check Channel Permissions:
    - Right-click the channel where the bot posts updates

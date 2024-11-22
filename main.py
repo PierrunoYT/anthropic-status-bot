@@ -25,14 +25,13 @@ class StatusBot(commands.Bot):
         intents.message_content = True
         intents.guild_messages = True
         
-        permissions = discord.Permissions()
-        permissions.update(
-            view_channel=True,
-            send_messages=True,
-            embed_links=True,
-            read_message_history=True,
-            manage_messages=True
-        )
+        # Permission integer: 68608
+        # Represents: View Channels (1 << 10)
+        #            Send Messages (1 << 11)
+        #            Manage Messages (1 << 12)
+        #            Embed Links (1 << 14)
+        #            Read Message History (1 << 16)
+        permissions = discord.Permissions(68608)
         
         super().__init__(command_prefix="!", intents=intents)
         

@@ -25,20 +25,27 @@ class StatusBot(commands.Bot):
         intents.message_content = True
         intents.guild_messages = True
         
-        # Permission integer: 68608
-        # Represents: View Channels (1 << 10)
-        #            Send Messages (1 << 11)
-        #            Manage Messages (1 << 12)
-        #            Embed Links (1 << 14)
-        #            Read Message History (1 << 16)
-        permissions = discord.Permissions(68608)
+        # Set up required permissions
+        permissions = discord.Permissions(
+            view_channel=True,
+            send_messages=True,
+            manage_messages=True,
+            embed_links=True,
+            read_message_history=True
+        )
         
         super().__init__(command_prefix="!", intents=intents)
         
         self.status_checker = StatusChecker()
         self.status_message_id: Optional[int] = None
         self.scheduler = AsyncIOScheduler()
-        self.required_permissions = permissions
+        self.required_permissions = [
+            'view_channel',
+            'send_messages',
+            'manage_messages',
+            'embed_links',
+            'read_message_history'
+        ]
         
         # Register event handlers
         self.setup_events()
@@ -59,11 +66,15 @@ class StatusBot(commands.Bot):
         
         # Check bot permissions in the channel
         bot_member = channel.guild.get_member(self.user.id)
+        if not bot_member:
+            logger.error(f"Could not find bot member in guild for channel {channel.name}")
+            return
+            
         channel_permissions = channel.permissions_for(bot_member)
-        
         missing_permissions = []
-        for perm, required in self.required_permissions:
-            if required and not getattr(channel_permissions, perm, False):
+        
+        for perm in self.required_permissions:
+            if not getattr(channel_permissions, perm, False):
                 missing_permissions.append(perm)
         
         if missing_permissions:

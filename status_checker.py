@@ -99,9 +99,10 @@ class StatusChecker:
         """Parse overall system status."""
         selectors = self._selectors['overall']
         status_elem = soup.select_one(selectors['status'])
+        description_elem = soup.select_one(selectors['description'])
         
         return {
-            'description': soup.select_one(selectors['description']).text.strip() or 'All Systems Operational',
+            'description': description_elem.text.strip() if description_elem else 'All Systems Operational',
             'level': self._determine_status_level(status_elem.get('class', []) if status_elem else [])
         }
 
@@ -123,10 +124,16 @@ class StatusChecker:
         timestamp = datetime.utcnow().isoformat()
 
         for element in soup.select(selectors['container']):
-            name = element.select_one(selectors['name']).text.strip()
+            name_elem = element.select_one(selectors['name'])
+            status_elem = element.select_one(selectors['status'])
+            
+            if not name_elem or not status_elem:
+                continue
+                
+            name = name_elem.text.strip()
             if name in self._components:
                 components[name] = {
-                    'status': element.select_one(selectors['status']).text.strip(),
+                    'status': status_elem.text.strip(),
                     'timestamp': timestamp
                 }
 
@@ -147,13 +154,21 @@ class StatusChecker:
         """Parse single incident element."""
         selectors = self._selectors['incident']
         title_elem = incident_elem.select_one(selectors['title'])
+        if not title_elem:
+            return {
+                'id': str(int(datetime.now().timestamp())),
+                'name': 'Unknown Incident',
+                'impact': 'none',
+                'status': 'investigating',
+                'updates': []
+            }
+            
         link_elem = title_elem.find('a')
-        
         updates = self._parse_updates(soup, incident_elem)
         
         return {
-            'id': link_elem['href'].split('/')[-1] if link_elem else str(int(datetime.now().timestamp())),
-            'name': link_elem.text.strip() if link_elem else '',
+            'id': link_elem['href'].split('/')[-1] if link_elem and link_elem.get('href') else str(int(datetime.now().timestamp())),
+            'name': link_elem.text.strip() if link_elem else title_elem.text.strip(),
             'impact': self._determine_impact_level(title_elem.get('class', [])),
             'status': updates[0]['status'] if updates else 'investigating',
             'updates': updates
@@ -175,15 +190,27 @@ class StatusChecker:
         selectors = self._selectors['incident']
         updates = []
 
+        if not incident_elem:
+            return updates
+
         for update_elem in incident_elem.select(selectors['update']):
+            if not update_elem:
+                continue
+
             small_elem = update_elem.find('small')
             if not small_elem:
                 continue
 
-            status = update_elem.find('strong').text.strip().lower() if update_elem.find('strong') else 'investigating'
-            message = update_elem.select_one(selectors['message']).text.strip() if update_elem.select_one(selectors['message']) else ''
-            
-            timestamp = self._parse_timestamp(self._extract_date_info(soup, small_elem))
+            strong_elem = update_elem.find('strong')
+            message_elem = update_elem.select_one(selectors['message'])
+
+            try:
+                status = strong_elem.text.strip().lower() if strong_elem else 'investigating'
+                message = message_elem.text.strip() if message_elem else ''
+                timestamp = self._parse_timestamp(self._extract_date_info(soup, small_elem))
+            except (AttributeError, ValueError) as e:
+                logging.warning(f"Error parsing update element: {str(e)}")
+                continue
             
             updates.append({
                 'status': status,
@@ -195,13 +222,33 @@ class StatusChecker:
 
     def _extract_date_info(self, soup: BeautifulSoup, small_elem) -> str:
         """Extract date information from update element."""
-        selectors = self._selectors['incident']['date']
-        month = small_elem.text.strip().split()[0]
-        day = small_elem.select_one(selectors['day']).text.strip() if small_elem.select_one(selectors['day']) else ''
-        time = small_elem.select_one(selectors['time']).text.strip() if small_elem.select_one(selectors['time']) else ''
-        year = small_elem.select_one(selectors['year']).text.strip() if small_elem.select_one(selectors['year']) else str(datetime.now().year)
-        
-        return f"{month} {day}, {year} {time}"
+        try:
+            if not small_elem or not small_elem.text:
+                return datetime.utcnow().strftime("%B %d, %Y %I:%M %p")
+                
+            selectors = self._selectors['incident']['date']
+            text_parts = small_elem.text.strip().split()
+            
+            if not text_parts:
+                return datetime.utcnow().strftime("%B %d, %Y %I:%M %p")
+                
+            month = text_parts[0]
+            day = (small_elem.select_one(selectors['day']).text.strip() 
+                  if small_elem.select_one(selectors['day']) else '')
+            time = (small_elem.select_one(selectors['time']).text.strip() 
+                   if small_elem.select_one(selectors['time']) else '')
+            year = (small_elem.select_one(selectors['year']).text.strip() 
+                   if small_elem.select_one(selectors['year']) else str(datetime.now().year))
+            
+            # Ensure we have all required parts
+            if not all([month, day, year, time]):
+                return datetime.utcnow().strftime("%B %d, %Y %I:%M %p")
+            
+            return f"{month} {day}, {year} {time}"
+            
+        except Exception as e:
+            logging.warning(f"Error extracting date info: {str(e)}")
+            return datetime.utcnow().strftime("%B %d, %Y %I:%M %p")
 
     def _parse_timestamp(self, timestamp_str: str) -> str:
         """Parse timestamp string to ISO format."""
@@ -258,57 +305,79 @@ class StatusChecker:
         """Compare previous and current states for changes."""
         updates = []
 
-        # Check overall status
-        if previous['overall']['description'] != current['overall']['description']:
-            updates.append({
-                'type': 'status_change',
-                'message': f"System status changed to: {current['overall']['description']}",
-                'timestamp': current['timestamp'],
-                'level': current['overall']['level']
-            })
-
-        # Check components
-        for component, current_status in current['components'].items():
-            previous_status = previous['components'].get(component)
-            if not previous_status or previous_status['status'] != current_status['status']:
+        try:
+            # Check overall status
+            if (previous.get('overall', {}).get('description') != 
+                current.get('overall', {}).get('description')):
                 updates.append({
-                    'type': 'component_update',
-                    'message': f"{component} status changed to: {current_status['status']}",
-                    'timestamp': current_status['timestamp'],
-                    'component': component
+                    'type': 'status_change',
+                    'message': f"System status changed to: {current['overall']['description']}",
+                    'timestamp': current.get('timestamp', datetime.utcnow().isoformat()),
+                    'level': current['overall'].get('level', 'unknown')
                 })
 
-        # Check incidents
-        if current['incidents']:
-            current_incident_ids = {i['id'] for i in current['incidents']}
-            previous_incident_ids = {i['id'] for i in previous['incidents']}
-
-            for incident in current['incidents']:
-                if incident['id'] not in previous_incident_ids:
+            # Check components
+            current_components = current.get('components', {})
+            previous_components = previous.get('components', {})
+            
+            for component, current_status in current_components.items():
+                previous_status = previous_components.get(component)
+                if not previous_status or previous_status.get('status') != current_status.get('status'):
                     updates.append({
-                        'type': 'new_incident',
-                        'message': (
-                            f"New incident reported:\n{incident['name']}\n"
-                            f"Impact: {incident['impact']}\nStatus: {incident['status']}"
-                        ),
-                        'timestamp': incident['updates'][0]['timestamp'] if incident['updates'] else current['timestamp'],
-                        'incident': incident
-                    })
-                    continue
-
-                previous_incident = next(
-                    (i for i in previous['incidents'] if i['id'] == incident['id']),
-                    None
-                )
-                
-                if (previous_incident and 
-                    (previous_incident['status'] != incident['status'] or 
-                     len(previous_incident['updates']) != len(incident['updates']))):
-                    updates.append({
-                        'type': 'incident_update',
-                        'message': f"Incident \"{incident['name']}\" status updated to: {incident['status']}",
-                        'timestamp': incident['updates'][0]['timestamp'] if incident['updates'] else current['timestamp'],
-                        'incident': incident
+                        'type': 'component_update',
+                        'message': f"{component} status changed to: {current_status.get('status', 'unknown')}",
+                        'timestamp': current_status.get('timestamp', datetime.utcnow().isoformat()),
+                        'component': component
                     })
 
+            # Check incidents
+            current_incidents = current.get('incidents', [])
+            previous_incidents = previous.get('incidents', [])
+            
+            if current_incidents:
+                current_incident_ids = {i.get('id') for i in current_incidents if i.get('id')}
+                previous_incident_ids = {i.get('id') for i in previous_incidents if i.get('id')}
+
+                for incident in current_incidents:
+                    incident_id = incident.get('id')
+                    if not incident_id:
+                        continue
+                        
+                    if incident_id not in previous_incident_ids:
+                        updates.append({
+                            'type': 'new_incident',
+                            'message': (
+                                f"New incident reported:\n{incident.get('name', 'Unknown')}\n"
+                                f"Impact: {incident.get('impact', 'unknown')}\n"
+                                f"Status: {incident.get('status', 'unknown')}"
+                            ),
+                            'timestamp': (incident.get('updates', [{}])[0].get('timestamp') 
+                                        if incident.get('updates') 
+                                        else current.get('timestamp', datetime.utcnow().isoformat())),
+                            'incident': incident
+                        })
+                        continue
+
+                    previous_incident = next(
+                        (i for i in previous_incidents if i.get('id') == incident_id),
+                        None
+                    )
+                    
+                    if (previous_incident and 
+                        (previous_incident.get('status') != incident.get('status') or 
+                         len(previous_incident.get('updates', [])) != len(incident.get('updates', [])))):
+                        updates.append({
+                            'type': 'incident_update',
+                            'message': (
+                                f"Incident \"{incident.get('name', 'Unknown')}\" "
+                                f"status updated to: {incident.get('status', 'unknown')}"
+                            ),
+                            'timestamp': (incident.get('updates', [{}])[0].get('timestamp')
+                                        if incident.get('updates')
+                                        else current.get('timestamp', datetime.utcnow().isoformat())),
+                            'incident': incident
+                        })
+        except Exception as e:
+            logging.error(f"Error comparing states: {str(e)}")
+            
         return updates

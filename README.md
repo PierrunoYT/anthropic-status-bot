@@ -1,32 +1,67 @@
-# anthropic-status-bot
+# Anthropic Status Bot
 
-discord bot that monitors anthropic's status page and provides real-time updates.
+A Discord bot that monitors Anthropic's status page and provides real-time updates about system status, incidents, and component health.
 
-## features
+## Features
 
-- real-time status monitoring
-- live status dashboard
-- incident notifications
-- timeline view of updates
+- Real-time monitoring of Anthropic's status page
+- Automatic status updates in a designated Discord channel
+- Component status tracking
+- Incident reporting and updates
+- Configurable check intervals
 
-## setup
+## Requirements
 
-1. clone and install
+- Python 3.9 or higher
+- Discord Bot Token
+- Discord Channel ID
+
+## Installation
+
+1. Clone the repository:
 ```bash
-git clone https://github.com/peltae/anthropic-status-bot.git
+git clone https://github.com/yourusername/anthropic-status-bot.git
 cd anthropic-status-bot
-npm install
 ```
 
-2. run
+2. Install dependencies:
 ```bash
-npm start
+pip install -r requirements.txt
 ```
 
-# config
-1. rename .env.example to .env 
-2. add your token & channel id
+3. Create a `.env` file based on `.env.example`:
+```bash
+cp .env.example .env
+```
 
-## license
+4. Configure your environment variables in `.env`:
+```
+DISCORD_TOKEN=your_discord_bot_token_here
+DISCORD_CHANNEL_ID=your_channel_id_here
+CHECK_INTERVAL=5
+LOG_LEVEL=info
+```
 
-this project is licensed under the [mit license](LICENSE)
+## Usage
+
+Run the bot:
+```bash
+python src/main.py
+```
+
+The bot will:
+- Connect to Discord using your bot token
+- Monitor Anthropic's status page at the specified interval
+- Post updates to the configured Discord channel
+- Send notifications for any status changes or incidents
+
+## Configuration
+
+- `DISCORD_TOKEN`: Your Discord bot token
+- `DISCORD_CHANNEL_ID`: The ID of the channel where updates will be posted
+- `CHECK_INTERVAL`: How often to check for updates (in minutes)
+- `LOG_LEVEL`: Logging level (none, debug, info, warn, error)
+
+## License
+
+ISC License

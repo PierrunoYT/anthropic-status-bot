@@ -185,13 +185,25 @@ class StatusBot(commands.Bot):
             return
             
         for update in updates:
-            embed = None
+            embeds_to_send = []
+            
             if update['type'] == 'new_incident':
-                embed = create_incident_embed(update['incident'])
-                logger.info("Sending new incident notification")
+                # For new incidents, send all updates in chronological order
+                incident = update['incident']
+                for incident_update in reversed(incident['updates']):
+                    embed = create_incident_embed(incident, incident_update)
+                    embeds_to_send.append(embed)
+                logger.info(f"Sending new incident notification with {len(incident['updates'])} updates")
+                
             elif update['type'] == 'incident_update':
-                embed = create_incident_embed(update['incident'])
-                logger.info("Sending incident update notification")
+                # For incident updates, send only the new update
+                incident = update['incident']
+                latest_update = incident['updates'][0] if incident['updates'] else None
+                if latest_update:
+                    embed = create_incident_embed(incident, latest_update)
+                    embeds_to_send.append(embed)
+                    logger.info("Sending incident update notification")
+                    
             elif update['type'] == 'status_change':
                 embed = discord.Embed(
                     title="Status Change",
@@ -199,7 +211,9 @@ class StatusBot(commands.Bot):
                     color=discord.Color.yellow() if update['level'] == 'degraded' else discord.Color.red(),
                     timestamp=datetime.fromisoformat(update['timestamp'])
                 )
+                embeds_to_send.append(embed)
                 logger.info("Sending status change notification")
+                
             elif update['type'] == 'component_update':
                 embed = discord.Embed(
                     title="Component Status Update",
@@ -207,9 +221,11 @@ class StatusBot(commands.Bot):
                     color=discord.Color.blue(),
                     timestamp=datetime.fromisoformat(update['timestamp'])
                 )
+                embeds_to_send.append(embed)
                 logger.info("Sending component update notification")
             
-            if embed:
+            # Send all embeds in order
+            for embed in embeds_to_send:
                 await channel.send(embed=embed)
 
     async def handle_status_update(self, current_state: Optional[dict], updates: Optional[list]):

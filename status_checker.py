@@ -11,6 +11,10 @@ class StatusChecker:
         self._previous_state = None
         self._current_state = None
         self._components: Set[str] = set(config.status.components)
+        self._state_file = "checker_state.txt"
+        
+        # Try to load previous state
+        self._load_state()
         
         # Cache selectors
         self._selectors = {
@@ -276,6 +280,30 @@ class StatusChecker:
         except:
             return datetime.utcnow().isoformat()
 
+    def _save_state(self):
+        """Save current state to file."""
+        if self._current_state:
+            try:
+                import json
+                with open(self._state_file, 'w') as f:
+                    json.dump({
+                        'current': self._current_state,
+                        'previous': self._previous_state
+                    }, f)
+            except Exception as e:
+                logging.error(f"Error saving checker state: {str(e)}")
+
+    def _load_state(self):
+        """Load state from file."""
+        try:
+            import json
+            with open(self._state_file, 'r') as f:
+                data = json.load(f)
+                self._current_state = data.get('current')
+                self._previous_state = data.get('previous')
+        except (FileNotFoundError, ValueError, json.JSONDecodeError):
+            pass
+
     def get_current_state(self) -> Optional[Dict[str, Any]]:
         """Get current state."""
         return self._current_state
@@ -292,6 +320,7 @@ class StatusChecker:
 
         if not self._previous_state:
             self._previous_state = current_state
+            self._save_state()
             logging.info(
                 "Status monitoring initialized",
                 extra={
@@ -311,6 +340,7 @@ class StatusChecker:
 
         updates = self._compare_states(self._previous_state, current_state)
         self._previous_state = current_state
+        self._save_state()
 
         return updates if updates else None
 

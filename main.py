@@ -34,6 +34,10 @@ class StatusBot(commands.Bot):
             read_message_history=True,
             manage_channels=True
         )
+
+        # Files to store persistent data
+        self.message_id_file = "status_message_id.txt"
+        self.last_status_file = "last_status.txt"
         
         super().__init__(command_prefix="!", intents=intents)
         
@@ -62,6 +66,40 @@ class StatusBot(commands.Bot):
         async def on_error(event, *args, **kwargs):
             logger.error(f"Error in {event}", exc_info=sys.exc_info())
 
+    def _load_message_id(self) -> Optional[int]:
+        """Load message ID from file."""
+        try:
+            with open(self.message_id_file, 'r') as f:
+                return int(f.read().strip())
+        except (FileNotFoundError, ValueError):
+            return None
+
+    def _save_last_status(self, status: dict):
+        """Save last status to file."""
+        try:
+            import json
+            with open(self.last_status_file, 'w') as f:
+                json.dump(status, f)
+        except Exception as e:
+            logger.error(f"Error saving last status: {str(e)}")
+
+    def _load_last_status(self) -> Optional[dict]:
+        """Load last status from file."""
+        try:
+            import json
+            with open(self.last_status_file, 'r') as f:
+                return json.load(f)
+        except (FileNotFoundError, ValueError, json.JSONDecodeError):
+            return None
+
+    def _save_message_id(self, message_id: int):
+        """Save message ID to file."""
+        try:
+            with open(self.message_id_file, 'w') as f:
+                f.write(str(message_id))
+        except Exception as e:
+            logger.error(f"Error saving message ID: {str(e)}")
+
     async def update_status_message(self, channel: discord.TextChannel, current_state: dict):
         """Update or create status message and send notifications for changes."""
         status_embed = create_status_embed(current_state)
@@ -71,6 +109,12 @@ class StatusBot(commands.Bot):
         if not bot_member:
             logger.error(f"Could not find bot member in guild for channel {channel.name}")
             return
+
+        # Load message ID and last status from file if not in memory
+        if not self.status_message_id:
+            self.status_message_id = self._load_message_id()
+        if not self.last_status:
+            self.last_status = self._load_last_status()
             
         channel_permissions = channel.permissions_for(bot_member)
         missing_permissions = []
@@ -111,10 +155,12 @@ class StatusBot(commands.Bot):
                     new_message = await channel.send(embed=status_embed)
                     await new_message.pin()
                     self.status_message_id = new_message.id
+                    self._save_message_id(new_message.id)
             else:
                 new_message = await channel.send(embed=status_embed)
                 await new_message.pin()
                 self.status_message_id = new_message.id
+                self._save_message_id(new_message.id)
                 logger.info(f"Created status monitor message: {self.status_message_id}")
 
             # Send notification for significant changes
@@ -126,10 +172,12 @@ class StatusBot(commands.Bot):
 
             # Update last known status
             self.last_status = current_state
+            self._save_last_status(current_state)
         except Exception as e:
             logger.error(f"Error updating status message: {str(e)}")
             new_message = await channel.send(embed=status_embed)
             self.status_message_id = new_message.id
+            self._save_message_id(new_message.id)
 
     async def handle_new_incidents(self, channel: discord.TextChannel, updates: list):
         """Handle and send new incident notifications."""
@@ -220,6 +268,10 @@ class StatusBot(commands.Bot):
     async def close(self):
         """Clean up resources on shutdown."""
         logger.info("Shutting down bot...")
+        if self.status_message_id:
+            self._save_message_id(self.status_message_id)
+        if self.last_status:
+            self._save_last_status(self.last_status)
         self.scheduler.shutdown()
         await super().close()
 

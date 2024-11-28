@@ -179,15 +179,38 @@ class StatusBot(commands.Bot):
             self.status_message_id = new_message.id
             self._save_message_id(new_message.id)
 
-    async def handle_new_incidents(self, channel: discord.TextChannel, updates: list):
-        """Handle and send new incident notifications."""
+    async def handle_status_updates(self, channel: discord.TextChannel, updates: list):
+        """Handle and send notifications for all types of updates."""
         if not isinstance(updates, list):
             return
             
         for update in updates:
+            embed = None
             if update['type'] == 'new_incident':
-                await channel.send(embed=create_incident_embed(update['incident']))
-                logger.info("Sent new incident notification")
+                embed = create_incident_embed(update['incident'])
+                logger.info("Sending new incident notification")
+            elif update['type'] == 'incident_update':
+                embed = create_incident_embed(update['incident'])
+                logger.info("Sending incident update notification")
+            elif update['type'] == 'status_change':
+                embed = discord.Embed(
+                    title="Status Change",
+                    description=update['message'],
+                    color=discord.Color.yellow() if update['level'] == 'degraded' else discord.Color.red(),
+                    timestamp=datetime.fromisoformat(update['timestamp'])
+                )
+                logger.info("Sending status change notification")
+            elif update['type'] == 'component_update':
+                embed = discord.Embed(
+                    title="Component Status Update",
+                    description=update['message'],
+                    color=discord.Color.blue(),
+                    timestamp=datetime.fromisoformat(update['timestamp'])
+                )
+                logger.info("Sending component update notification")
+            
+            if embed:
+                await channel.send(embed=embed)
 
     async def handle_status_update(self, current_state: Optional[dict], updates: Optional[list]):
         """Handle status updates and send notifications."""
@@ -228,7 +251,7 @@ class StatusBot(commands.Bot):
             await self.update_status_message(channel, current_state)
             
             if updates and updates[0]['type'] != 'initial':
-                await self.handle_new_incidents(channel, updates)
+                await self.handle_status_updates(channel, updates)
                 
         except Exception as e:
             logger.error(f"Error handling status update: {str(e)}")

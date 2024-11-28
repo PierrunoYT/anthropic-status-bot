@@ -81,29 +81,35 @@ def create_status_embed(status: Dict[str, Any]) -> Embed:
     embed.set_footer(text='Last Updated')
     return embed
 
-def create_incident_embed(incident: Dict[str, Any]) -> Embed:
+def create_incident_embed(incident: Dict[str, Any], update: Dict[str, Any] = None) -> Embed:
     """Create incident embed message."""
     embed = Embed(
-        title=f"🚨 {format_status(incident['name'])}",
-        colour=STATUS_COLORS.get(incident['impact'], STATUS_COLORS['default']),
-        timestamp=datetime.utcnow()
+        title=format_status(incident['name']),
+        colour=STATUS_COLORS.get(incident['impact'], STATUS_COLORS['default'])
     )
 
-    # Set description with impact and status
-    embed.description = (
-        f"**Impact**: {format_status(incident['impact'])}\n"
-        f"{get_status_indicator(incident['status'])} **Status**: {format_status(incident['status'])}\n\n"
-        f"📅 **Timeline**:"
-    )
-
-    # Add updates if available
-    if incident.get('updates'):
-        updates_text = '\n\n'.join(
-            f"{get_status_indicator(update['status'])} **{format_status(update['status'])}**\n"
-            f"┣━ 🕒 {datetime.fromisoformat(update['timestamp'].replace('Z', '+00:00')).strftime('%B %d, %Y at %H:%M UTC')}\n"
-            f"┗━ {format_status(update['message'])}"
-            for update in incident['updates']
+    if update:
+        # Use the update's timestamp
+        embed.timestamp = datetime.fromisoformat(update['timestamp'].replace('Z', '+00:00'))
+        
+        # Set description with status and message
+        status_indicator = get_status_indicator(update['status'])
+        embed.description = (
+            f"{status_indicator} **{format_status(update['status'])}**\n"
+            f"{update['message']}"
         )
-        embed.add_field(name='📝 Updates', value=updates_text, inline=False)
+    else:
+        # Use current time and latest update
+        embed.timestamp = datetime.utcnow()
+        latest_update = incident['updates'][0] if incident.get('updates') else None
+        
+        if latest_update:
+            status_indicator = get_status_indicator(latest_update['status'])
+            embed.description = (
+                f"{status_indicator} **{format_status(latest_update['status'])}**\n"
+                f"{latest_update['message']}"
+            )
+        else:
+            embed.description = f"🔍 **Status**: {format_status(incident['status'])}"
 
     return embed

@@ -12,7 +12,7 @@ A Discord bot that monitors Anthropic's status page and provides real-time updat
 
 ## Requirements
 
-- Python 3.9 or higher
+- Python 3.9 or higher (3.11+ recommended for best performance)
 - Discord Bot Token
 - Discord Channel ID
 
@@ -47,7 +47,7 @@ To set up these permissions:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/anthropic-status-bot.git
+git clone https://github.com/PierrunoYT/anthropic-status-bot.git
 cd anthropic-status-bot
 ```
 
@@ -55,6 +55,16 @@ cd anthropic-status-bot
 ```bash
 pip install -r requirements.txt
 ```
+
+Required package versions:
+- discord.py >= 2.3.2
+- aiohttp >= 3.9.1
+- beautifulsoup4 >= 4.12.2
+- python-dotenv >= 1.0.0
+- apscheduler >= 3.10.4
+- python-dateutil >= 2.8.2
+- pydantic >= 2.5.3
+- pydantic-settings >= 2.1.0
 
 3. Create a `.env` file based on `.env.example`:
 ```bash
@@ -73,7 +83,7 @@ LOG_LEVEL=info
 
 Run the bot:
 ```bash
-python src/main.py
+python main.py
 ```
 
 The bot will:

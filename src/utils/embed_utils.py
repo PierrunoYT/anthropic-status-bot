@@ -20,15 +20,22 @@ def format_status(status: str) -> str:
 
 def get_status_dot(status: str) -> str:
     """Get status indicator dot."""
-    return "●" if any(s in status.lower() for s in ["operational", "maintenance", "resolved"]) else "○"
+    status_lower = status.lower()
+    if any(s in status_lower for s in ["operational"]):
+        return "●"  # Filled circle for operational
+    elif any(s in status_lower for s in ["maintenance", "resolved"]):
+        return "◉"  # Different dot for maintenance/resolved
+    else:
+        return "○"  # Empty circle for other states
 
 def create_status_embed(status: Dict[str, Any]) -> Embed:
     """Create status overview embed."""
     now = datetime.utcnow()
+    status_level = status['overall']['level']
     embed = Embed(
         title="☀️ Anthropic Status",
-        description=f"○ {format_status(status['overall']['description'])}",
-        color=STATUS_COLORS.get(status['overall']['level'], STATUS_COLORS['default'])
+        description=f"{get_status_dot(status['overall']['description'])} {format_status(status['overall']['description'])}",
+        color=STATUS_COLORS.get(status_level, STATUS_COLORS['default'])
     )
     
     # Set footer with English format and divider

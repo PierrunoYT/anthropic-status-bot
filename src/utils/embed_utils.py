@@ -53,15 +53,6 @@ def create_status_embed(status: Dict[str, Any]) -> Embed:
     if component_status:
         embed.add_field(name="components", value=component_status, inline=False)
 
-    # Add active incidents
-    active_incidents = [i for i in status['incidents'] if i['status'] != 'resolved']
-    if active_incidents:
-        incidents_list = "\n\n".join(
-            f"{get_status_dot(i['status'])} {format_status(i['name'])}\n  status: {format_status(i['status'])}"
-            for i in active_incidents
-        )
-        embed.add_field(name="active incidents", value=incidents_list, inline=False)
-
     return embed
 
 def create_incident_embed(incident: Dict[str, Any]) -> Embed:

@@ -86,9 +86,14 @@ class AnthropicStatusBot(discord.Client):
             )
 
             # Handle incident updates
-            if updates and updates.get('type') != 'initial' and isinstance(updates, list):
+            if updates and isinstance(updates, list):
+                # Skip if this is just the initial status
+                if len(updates) == 1 and updates[0].get('type') == 'initial':
+                    return
+                    
+                # Process incident updates
                 for update in updates:
-                    if update['type'] in ['new_incident', 'incident_update']:
+                    if update.get('type') in ['new_incident', 'incident_update']:
                         message_id = await self.update_message(
                             channel,
                             self.state['incident_messages'].get(update['incident']['id']),

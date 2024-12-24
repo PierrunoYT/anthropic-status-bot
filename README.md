@@ -14,7 +14,7 @@ discord bot that monitors anthropic's status page and provides real-time updates
 - Python 3.9 or higher
 - pip (Python package installer)
 
-## setup
+## local setup
 
 1. clone and create virtual environment
 ```bash
@@ -50,6 +50,21 @@ LOG_LEVEL=info    # one of: info, warn, error
 ```bash
 python src/index.py
 ```
+
+## hosting service deployment
+
+### sparked host setup
+1. upload files to your server
+2. set python version to 3.9 or higher in server panel
+3. create .env file with your configuration
+4. start the bot using the control panel
+
+### other hosting services
+The bot is compatible with any Python hosting service that supports:
+- Python 3.9+
+- Virtual environments
+- Environment variables
+- Background processes
 
 ## development
 

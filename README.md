@@ -104,7 +104,7 @@ LOGGING__DATE_FORMAT="%Y-%m-%d %H:%M:%S"                               # Date fo
 
 4. **Run the Bot**
 ```bash
-python start.py
+python start.py  # Single entry point that handles both path setup and bot startup
 ```
 
 ---

@@ -40,20 +40,19 @@ class Settings(BaseSettings):
 
     @classmethod
     def from_env(cls) -> "Settings":
-        return cls(
-            discord=DiscordConfig(
-                token=cls._get_env_var("DISCORD_TOKEN"),
-                channel_id=cls._get_env_var("DISCORD_CHANNEL_ID"),
-                check_interval=cls._get_env_var("CHECK_INTERVAL", "5")
-            )
-        )
-
-    @staticmethod
-    def _get_env_var(key: str, default: str = None) -> str:
         from os import environ
         from dotenv import load_dotenv
         load_dotenv()
-        return environ.get(key, default)
+
+        return cls(
+            discord=DiscordConfig(
+                token=environ.get("DISCORD_TOKEN", ""),
+                channel_id=environ.get("DISCORD_CHANNEL_ID", ""),
+                check_interval=int(environ.get("CHECK_INTERVAL", "5"))
+            ),
+            status=StatusConfig(),  # Use defaults
+            logging=LoggingConfig()  # Use defaults
+        )
 
 # Create a global config instance
 config = Settings.from_env()

@@ -12,6 +12,12 @@ discord bot that monitors anthropic's status page and provides real-time updates
   - Timestamp with divider line
 - incident notifications
 - component status tracking
+- robust error handling with exponential backoff retries
+- configurable monitoring for specific Anthropic components:
+  - console.anthropic.com
+  - api.anthropic.com
+  - api.anthropic.com - Beta Features
+  - anthropic.com
 
 ## requirements
 
@@ -44,10 +50,16 @@ pip install -r requirements.txt
 cp .env.example .env
 
 # edit .env file with your settings:
-DISCORD_TOKEN=your_bot_token
-DISCORD_CHANNEL_ID=your_channel_id
-CHECK_INTERVAL=5  # minutes between checks
-LOG_LEVEL=info    # one of: info, warn, error
+DISCORD_TOKEN=your_bot_token                # Discord bot token
+DISCORD_CHANNEL_ID=your_channel_id          # Channel for status updates
+CHECK_INTERVAL=5                            # Minutes between checks (minimum: 1)
+LOG_LEVEL=info                              # Logging level (info, warn, error)
+
+# Advanced Configuration (optional):
+STATUS__URL=https://status.anthropic.com    # Status page URL
+STATUS__TIMEOUT=10000                       # Request timeout in ms
+STATUS__RETRIES=3                          # Number of retry attempts
+STATUS__USER_AGENT=AnthropicStatusBot/1.0  # Custom user agent
 ```
 
 4. run

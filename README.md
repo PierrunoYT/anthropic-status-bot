@@ -1,51 +1,67 @@
 # Anthropic Status Bot
 
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Discord bot that monitors Anthropic's status page and provides real-time updates.
 
-## Features
+📦 **Repository:** [github.com/PierrunoYT/anthropic-status-bot](https://github.com/PierrunoYT/anthropic-status-bot)
 
+---
+
+## 🌟 Features
+
+### 📊 Live Status Dashboard
 - Real-time status monitoring with in-place updates
-- Live status dashboard with rich Discord embed formatting:
-  - Color-coded status indicators (operational: green, degraded: yellow, outage: red)
-  - Smart status dots (● for operational/resolved, ○ for issues)
-  - Hierarchical component layout with proper indentation
-  - Active incident tracking with impact levels
-  - User-friendly timestamp formatting with divider line
-  - Detailed incident updates with UTC timestamps
-- Incident notifications with impact level tracking (minor/major/critical)
+- Rich Discord embed formatting:
+  - 🟢 Color-coded status indicators (operational: green, degraded: yellow, outage: red)
+  - ⚪ Smart status dots (● for operational/resolved, ○ for issues)
+  - 📝 Hierarchical component layout with proper indentation
+  - ⚡ Active incident tracking with impact levels
+  - 🕒 User-friendly timestamp formatting with divider line
+  - 📅 Detailed incident updates with UTC timestamps
+
+### 🔔 Incident Management
+- Impact level tracking (minor/major/critical)
 - Intelligent component status tracking:
   - Duplicate detection with configurable expiry window
   - Detailed state comparison and change detection
   - Timestamp tracking for each component
-- Robust error handling and logging:
-  - Exponential backoff retry mechanism
-  - Configurable retry attempts and timeouts
-  - Structured logging with detailed formatting
+
+### 🛡️ Robust Error Handling
+- Exponential backoff retry mechanism
+- Configurable retry attempts and timeouts
+- Structured logging with detailed formatting:
   - Request logging with duration tracking
   - Error logging with context and stack traces
   - Multiple log levels (info, warn, error, debug)
   - UTC timestamp standardization
-- Advanced monitoring capabilities:
-  - Configurable component filtering
-  - Custom user agent support
-  - Cache control
-  - Flexible HTML parsing with configurable selectors
-- Monitored components:
-  - console.anthropic.com
-  - api.anthropic.com
-  - api.anthropic.com - Beta Features
-  - anthropic.com
 
-## Requirements
+### 🔍 Monitoring Capabilities
+- Configurable component filtering
+- Custom user agent support
+- Cache control
+- Flexible HTML parsing with configurable selectors
 
+### 🎯 Monitored Components
+- console.anthropic.com
+- api.anthropic.com
+- api.anthropic.com - Beta Features
+- anthropic.com
+
+---
+
+## 🚀 Getting Started
+
+### Requirements
 - Python 3.9 or higher
 - pip (Python package installer)
 
-## Local Setup
+### Local Setup
 
-1. Clone and create virtual environment
+1. **Clone and Create Virtual Environment**
 ```bash
-git clone https://github.com/peltae/anthropic-status-bot.git
+git clone https://github.com/PierrunoYT/anthropic-status-bot.git
 cd anthropic-status-bot
 python -m venv venv
 
@@ -56,17 +72,17 @@ python -m venv venv
 source venv/bin/activate
 ```
 
-2. Install dependencies
+2. **Install Dependencies**
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Configure
+3. **Configure Environment**
 ```bash
-# copy example environment file
+# Copy example environment file
 cp .env.example .env
 
-# edit .env file with your settings:
+# Edit .env file with your settings:
 DISCORD_TOKEN=your_bot_token                # Discord bot token
 DISCORD_CHANNEL_ID=your_channel_id          # Channel for status updates
 CHECK_INTERVAL=5                            # Minutes between checks (minimum: 1)
@@ -84,12 +100,14 @@ LOGGING__FORMAT="%(asctime)s - %(name)s - %(levelname)s - %(message)s"  # Log fo
 LOGGING__DATE_FORMAT="%Y-%m-%d %H:%M:%S"                               # Date format
 ```
 
-4. Run
+4. **Run the Bot**
 ```bash
 python start.py
 ```
 
-## Hosting Service Deployment
+---
+
+## 🏗️ Deployment
 
 ### Sparked Host Setup
 1. Upload files to your server
@@ -104,11 +122,13 @@ The bot is compatible with any Python hosting service that supports:
 - Environment variables
 - Background processes
 
-## Testing
+---
 
-Run the test suite to verify embed formatting and functionality. You have multiple options:
+## 🧪 Testing
 
-1. Using pytest directly:
+Run the test suite to verify embed formatting and functionality:
+
+### Using pytest directly:
 ```bash
 # Activate virtual environment if not already active
 .\venv\Scripts\activate  # Windows
@@ -118,7 +138,7 @@ source venv/bin/activate  # Unix/MacOS
 python -m pytest src/tests/test_bot.py -v
 ```
 
-2. Using provided test runners:
+### Using provided test runners:
 ```bash
 # On Windows:
 .\run_tests.ps1
@@ -127,6 +147,7 @@ python -m pytest src/tests/test_bot.py -v
 python run_test.py
 ```
 
+### Test Coverage
 The test suite verifies:
 - Status embed formatting and structure:
   - Color codes and status indicators
@@ -141,8 +162,11 @@ The test suite verifies:
   - Update tracking
   - Resolution detection
 
-## Development
+---
 
+## 🛠️ Development
+
+### Tech Stack
 The bot is built with:
 - discord.py - Discord API wrapper
 - beautifulsoup4 - HTML parsing
@@ -153,6 +177,8 @@ The bot is built with:
 - tenacity - Retry handling
 - lxml - XML/HTML processing
 
-## License
+---
+
+## 📄 License
 
 This project is licensed under the [MIT License](LICENSE)

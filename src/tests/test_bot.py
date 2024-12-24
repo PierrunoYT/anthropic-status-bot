@@ -1,7 +1,11 @@
 import pytest
 from datetime import datetime
-from discord import Embed
-from ..utils.embed_utils import create_status_embed, format_name, format_status, get_status_dot
+import sys
+import os
+
+# Add src directory to Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+from src.utils.embed_utils import create_status_embed, format_name, format_status, get_status_dot
 
 def test_create_status_embed():
     """Test creation of status embed with all systems operational"""

@@ -5,7 +5,11 @@ discord bot that monitors anthropic's status page and provides real-time updates
 ## features
 
 - real-time status monitoring with in-place updates
-- live status dashboard
+- live status dashboard with custom embed formatting:
+  - Overall system status with status indicators (○/●)
+  - Component-wise status with indented layout
+  - Active incident tracking
+  - Timestamp with divider line
 - incident notifications
 - component status tracking
 
@@ -65,6 +69,24 @@ The bot is compatible with any Python hosting service that supports:
 - Virtual environments
 - Environment variables
 - Background processes
+
+## testing
+
+Run the test suite to verify embed formatting and functionality:
+```bash
+# Activate virtual environment if not already active
+.\venv\Scripts\activate  # Windows
+source venv/bin/activate  # Unix/MacOS
+
+# Run tests
+python -m pytest src/tests/test_bot.py -v
+```
+
+The test suite verifies:
+- Status embed formatting and structure
+- Component status display
+- Incident handling
+- Status indicators and visual elements
 
 ## development
 

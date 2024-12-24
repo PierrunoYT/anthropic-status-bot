@@ -40,7 +40,7 @@ def test_create_status_embed():
     # Verify embed structure
     assert isinstance(embed, Embed)
     assert embed.title == "☀️ Anthropic Status"
-    assert "All systems operational" in embed.description.lower()
+    assert embed.description.lower() == "○ all systems operational"
     
     # Verify components are properly formatted
     field = next((f for f in embed.fields if f.name == "components"), None)
@@ -79,7 +79,7 @@ def test_create_status_embed_with_incidents():
     embed = create_status_embed(status_data)
     
     # Verify degraded status
-    assert "Partial system outage" in embed.description.lower()
+    assert embed.description.lower() == "○ partial system outage"
     
     # Verify incident field exists
     incident_field = next((f for f in embed.fields if f.name == "active incidents"), None)
@@ -114,7 +114,7 @@ def test_empty_components():
     
     embed = create_status_embed(status_data)
     assert isinstance(embed, Embed)
-    assert "All systems operational" in embed.description.lower()
+    assert embed.description.lower() == "○ all systems operational"
     
     # Verify no components field when empty
     component_field = next((f for f in embed.fields if f.name == "components"), None)

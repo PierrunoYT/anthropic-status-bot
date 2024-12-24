@@ -5,11 +5,13 @@ discord bot that monitors anthropic's status page and provides real-time updates
 ## features
 
 - real-time status monitoring with in-place updates
-- live status dashboard with custom embed formatting:
-  - Overall system status with status indicators (○/●)
-  - Component-wise status with indented layout
-  - Active incident tracking
-  - Timestamp with divider line
+- live status dashboard with rich Discord embed formatting:
+  - Color-coded status indicators (operational: green, degraded: yellow, outage: red)
+  - Smart status dots (● for operational/resolved, ○ for issues)
+  - Hierarchical component layout with proper indentation
+  - Active incident tracking with impact levels
+  - User-friendly timestamp formatting with divider line
+  - Detailed incident updates with UTC timestamps
 - incident notifications with impact level tracking (minor/major/critical)
 - intelligent component status tracking:
   - Duplicate detection with configurable expiry window
@@ -126,10 +128,18 @@ python run_test.py
 ```
 
 The test suite verifies:
-- Status embed formatting and structure
-- Component status display
-- Incident handling
-- Status indicators and visual elements
+- Status embed formatting and structure:
+  - Color codes and status indicators
+  - Component hierarchy and indentation
+  - Timestamp formatting
+  - Status dot logic
+- Component status tracking:
+  - State changes and updates
+  - Status level determination
+- Incident handling:
+  - Impact level assessment
+  - Update tracking
+  - Resolution detection
 
 ## development
 

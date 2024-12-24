@@ -43,9 +43,18 @@ class AnthropicStatusBot(discord.Client):
                     # If message not found or can't be edited, create new one
                     logger.warn(f"Failed to edit message: {error}")
                     message = await channel.send(embed=embed)
+                    try:
+                        await message.pin(reason="Status message pinned for visibility")
+                    except discord.Forbidden:
+                        logger.warn("Failed to pin message: Missing permissions")
                     return message.id
             
+            # Send new message and pin it
             message = await channel.send(embed=embed)
+            try:
+                await message.pin(reason="Status message pinned for visibility")
+            except discord.Forbidden:
+                logger.warn("Failed to pin message: Missing permissions")
             return message.id
         except Exception as error:
             logger.log_error(error, {'operation': 'update_message'})

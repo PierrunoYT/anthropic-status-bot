@@ -25,15 +25,15 @@ def get_status_dot(status: str) -> str:
 def create_status_embed(status: Dict[str, Any]) -> Embed:
     """Create status overview embed."""
     embed = Embed(
-        title="anthropic status",
-        description=f"{get_status_dot(status['overall']['level'])} {format_status(status['overall']['description'])}",
+        title="☀️ Anthropic Status",
+        description=f"○ {format_status(status['overall']['description'])}",
         color=STATUS_COLORS.get(status['overall']['level'], STATUS_COLORS['default'])
     )
     embed.timestamp = datetime.utcnow()
 
     # Add component statuses
     component_status = "\n".join(
-        f"{get_status_dot(data['status'])} {format_name(name)} · {format_status(data['status'])}"
+        f"○ {format_name(name)}\n└─ {format_status(data['status'])}"
         for name, data in status['components'].items()
     )
     if component_status:

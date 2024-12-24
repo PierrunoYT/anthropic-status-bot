@@ -12,7 +12,7 @@ STATUS_COLORS = {
 
 def format_name(name: str) -> str:
     """Format component name for display."""
-    return name.lower().replace("- beta features", " (beta)")
+    return name.lower().replace("- beta features", "(beta)")
 
 def format_status(status: str) -> str:
     """Format status text for display."""

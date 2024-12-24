@@ -2,6 +2,7 @@ import pytest
 from datetime import datetime
 import sys
 import os
+from discord import Embed
 
 # Add src directory to Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))

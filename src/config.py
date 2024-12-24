@@ -33,10 +33,12 @@ class Settings(BaseSettings):
     status: StatusConfig = StatusConfig()
     logging: LoggingConfig = LoggingConfig()
 
-    class Config:
-        env_file = ".env"
-        env_prefix = ""
-        env_nested_delimiter = "__"
+    model_config = {
+        'env_file': '.env',
+        'env_file_encoding': 'utf-8',
+        'extra': 'ignore',
+        'env_nested_delimiter': '__'
+    }
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -44,14 +46,17 @@ class Settings(BaseSettings):
         from dotenv import load_dotenv
         load_dotenv()
 
+        # Map environment variables to nested structure
         return cls(
             discord=DiscordConfig(
                 token=environ.get("DISCORD_TOKEN", ""),
                 channel_id=environ.get("DISCORD_CHANNEL_ID", ""),
                 check_interval=int(environ.get("CHECK_INTERVAL", "5"))
             ),
-            status=StatusConfig(),  # Use defaults
-            logging=LoggingConfig()  # Use defaults
+            status=StatusConfig(),
+            logging=LoggingConfig(
+                level=LogLevel(environ.get("LOG_LEVEL", "info").lower())
+            )
         )
 
 # Create a global config instance

@@ -84,7 +84,8 @@ def test_create_status_embed_with_incidents():
     # Verify incident field exists
     incident_field = next((f for f in embed.fields if f.name == "active incidents"), None)
     assert incident_field is not None
-    assert "API Performance Issues" in incident_field.value.lower()
+    assert "api performance issues" in incident_field.value.lower()
+    assert "status: investigating" in incident_field.value.lower()
 
 def test_formatting_functions():
     """Test helper formatting functions"""

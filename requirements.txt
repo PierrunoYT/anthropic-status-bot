@@ -4,6 +4,7 @@ requests
 beautifulsoup4
 apscheduler
 pydantic
+pydantic-settings
 tenacity
 lxml
 pytest

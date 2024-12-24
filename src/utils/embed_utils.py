@@ -19,14 +19,18 @@ def format_status(status: str) -> str:
     return status.lower()
 
 def get_status_dot(status: str) -> str:
-    """Get status indicator dot."""
+    """Get status indicator dot using colored circle emojis."""
     status_lower = status.lower()
     if any(s in status_lower for s in ["operational"]):
-        return "●"  # Filled circle for operational
+        return "🟢"  # Green circle for operational
+    elif any(s in status_lower for s in ["degraded"]):
+        return "🟡"  # Yellow circle for degraded
+    elif any(s in status_lower for s in ["outage"]):
+        return "🔴"  # Red circle for outage
     elif any(s in status_lower for s in ["maintenance", "resolved"]):
-        return "◉"  # Different dot for maintenance/resolved
+        return "🔵"  # Blue circle for maintenance/resolved
     else:
-        return "○"  # Empty circle for other states
+        return "⚪"  # White circle for unknown/default
 
 def create_status_embed(status: Dict[str, Any]) -> Embed:
     """Create status overview embed."""

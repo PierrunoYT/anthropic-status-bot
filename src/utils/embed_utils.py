@@ -43,7 +43,7 @@ def create_status_embed(status: Dict[str, Any]) -> Embed:
 
     # Add component statuses with proper spacing
     component_status = "\n\n".join(
-        f"○ {format_name(name)}\n└─ {format_status(data['status'])}"
+        f"{get_status_dot(data['status'])} {format_name(name)}\n└─ {format_status(data['status'])}"
         for name, data in status['components'].items()
     )
     if component_status:
@@ -53,7 +53,7 @@ def create_status_embed(status: Dict[str, Any]) -> Embed:
     active_incidents = [i for i in status['incidents'] if i['status'] != 'resolved']
     if active_incidents:
         incidents_list = "\n\n".join(
-            f"{get_status_dot(i['status'])} {format_status(i['name'])}\n   status: {format_status(i['status'])}"
+            f"{get_status_dot(i['status'])} {format_status(i['name'])}\n  status: {format_status(i['status'])}"
             for i in active_incidents
         )
         embed.add_field(name="active incidents", value=incidents_list, inline=False)
@@ -64,8 +64,7 @@ def create_incident_embed(incident: Dict[str, Any]) -> Embed:
     """Create incident details embed."""
     embed = Embed(
         title=format_status(incident['name']),
-        description=f"impact: {format_status(incident['impact'])}\n"
-                   f"{get_status_dot(incident['status'])} status: {format_status(incident['status'])}",
+        description=f"impact: {format_status(incident['impact'])}\n{get_status_dot(incident['status'])} status: {format_status(incident['status'])}",
         color=STATUS_COLORS.get(incident['impact'], STATUS_COLORS['default'])
     )
     embed.timestamp = datetime.utcnow()

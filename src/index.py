@@ -55,6 +55,14 @@ class AnthropicStatusBot(discord.Client):
             logger.info("Creating new status message...")
             message = await channel.send(embed=embed)
             try:
+                # Unpin old status messages from the bot
+                pins = await channel.pins()
+                for pin in pins:
+                    if pin.author == self.user and pin.embeds:
+                        await pin.unpin()
+                        logger.info(f"Unpinned old status message: {pin.id}")
+                
+                # Pin the new message
                 await message.pin(reason="Status message pinned for visibility")
                 logger.info(f"Successfully pinned new status message {message.id}")
             except discord.Forbidden:

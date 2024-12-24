@@ -61,6 +61,10 @@ class AnthropicStatusBot(discord.Client):
             # Last resort: try to send a new message
             try:
                 message = await channel.send(embed=embed)
+                try:
+                    await message.pin(reason="Status message pinned for visibility")
+                except discord.Forbidden:
+                    logger.warn("Failed to pin message: Missing permissions")
                 return message.id
             except Exception as final_error:
                 logger.log_error(final_error, {'operation': 'update_message_fallback'})

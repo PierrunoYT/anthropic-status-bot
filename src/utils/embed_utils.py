@@ -24,15 +24,18 @@ def get_status_dot(status: str) -> str:
 
 def create_status_embed(status: Dict[str, Any]) -> Embed:
     """Create status overview embed."""
+    now = datetime.utcnow()
     embed = Embed(
         title="☀️ Anthropic Status",
         description=f"○ {format_status(status['overall']['description'])}",
         color=STATUS_COLORS.get(status['overall']['level'], STATUS_COLORS['default'])
     )
-    embed.timestamp = datetime.utcnow()
+    
+    # Set footer with English format
+    embed.set_footer(text=f"Last Updated • {now.strftime('%I:%M %p')}")
 
-    # Add component statuses
-    component_status = "\n".join(
+    # Add component statuses with proper spacing
+    component_status = "\n\n".join(
         f"○ {format_name(name)}\n└─ {format_status(data['status'])}"
         for name, data in status['components'].items()
     )

@@ -15,10 +15,14 @@ discord bot that monitors anthropic's status page and provides real-time updates
   - Duplicate detection with configurable expiry window
   - Detailed state comparison and change detection
   - Timestamp tracking for each component
-- robust error handling:
+- robust error handling and logging:
   - Exponential backoff retry mechanism
   - Configurable retry attempts and timeouts
-  - Comprehensive error logging
+  - Structured logging with detailed formatting
+  - Request logging with duration tracking
+  - Error logging with context and stack traces
+  - Multiple log levels (info, warn, error, debug)
+  - UTC timestamp standardization
 - advanced monitoring capabilities:
   - Configurable component filtering
   - Custom user agent support
@@ -64,13 +68,18 @@ cp .env.example .env
 DISCORD_TOKEN=your_bot_token                # Discord bot token
 DISCORD_CHANNEL_ID=your_channel_id          # Channel for status updates
 CHECK_INTERVAL=5                            # Minutes between checks (minimum: 1)
-LOG_LEVEL=info                              # Logging level (info, warn, error)
+LOG_LEVEL=info                              # Logging level (info, warn, error, debug)
 
 # Advanced Configuration (optional):
+# Status Page Configuration:
 STATUS__URL=https://status.anthropic.com    # Status page URL
 STATUS__TIMEOUT=10000                       # Request timeout in ms
 STATUS__RETRIES=3                          # Number of retry attempts
 STATUS__USER_AGENT=AnthropicStatusBot/1.0  # Custom user agent
+
+# Logging Configuration:
+LOGGING__FORMAT="%(asctime)s - %(name)s - %(levelname)s - %(message)s"  # Log format
+LOGGING__DATE_FORMAT="%Y-%m-%d %H:%M:%S"                               # Date format
 ```
 
 4. run

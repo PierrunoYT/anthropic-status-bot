@@ -1,8 +1,8 @@
-# anthropic-status-bot
+# Anthropic Status Bot
 
-discord bot that monitors anthropic's status page and provides real-time updates.
+Discord bot that monitors Anthropic's status page and provides real-time updates.
 
-## features
+## Features
 
 - real-time status monitoring with in-place updates
 - live status dashboard with rich Discord embed formatting:
@@ -36,12 +36,12 @@ discord bot that monitors anthropic's status page and provides real-time updates
   - api.anthropic.com - Beta Features
   - anthropic.com
 
-## requirements
+## Requirements
 
 - Python 3.9 or higher
 - pip (Python package installer)
 
-## local setup
+## Local Setup
 
 1. clone and create virtual environment
 ```bash
@@ -89,22 +89,22 @@ LOGGING__DATE_FORMAT="%Y-%m-%d %H:%M:%S"                               # Date fo
 python src/index.py
 ```
 
-## hosting service deployment
+## Hosting Service Deployment
 
-### sparked host setup
+### Sparked Host Setup
 1. upload files to your server
 2. set python version to 3.9 or higher in server panel
 3. create .env file with your configuration
 4. start the bot using the control panel
 
-### other hosting services
+### Other Hosting Services
 The bot is compatible with any Python hosting service that supports:
 - Python 3.9+
 - Virtual environments
 - Environment variables
 - Background processes
 
-## testing
+## Testing
 
 Run the test suite to verify embed formatting and functionality. You have multiple options:
 
@@ -141,7 +141,7 @@ The test suite verifies:
   - Update tracking
   - Resolution detection
 
-## development
+## Development
 
 The bot is built with:
 - discord.py - Discord API wrapper
@@ -153,6 +153,6 @@ The bot is built with:
 - tenacity - Retry handling
 - lxml - XML/HTML processing
 
-## license
+## License
 
-this project is licensed under the [mit license](LICENSE)
+This project is licensed under the [MIT License](LICENSE)

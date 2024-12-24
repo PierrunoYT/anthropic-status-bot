@@ -31,8 +31,8 @@ def create_status_embed(status: Dict[str, Any]) -> Embed:
         color=STATUS_COLORS.get(status['overall']['level'], STATUS_COLORS['default'])
     )
     
-    # Set footer with English format
-    embed.set_footer(text=f"Last Updated • {now.strftime('%I:%M %p')}")
+    # Set footer with English format and divider
+    embed.set_footer(text=f"─────────────\nLast Updated • {now.strftime('%I:%M %p')}")
 
     # Add component statuses with proper spacing
     component_status = "\n\n".join(

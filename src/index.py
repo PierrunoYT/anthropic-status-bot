@@ -141,6 +141,21 @@ class AnthropicStatusBot(discord.Client):
     async def on_ready(self):
         """Handle bot ready event."""
         logger.info(f"Bot ready as {self.user}")
+        
+        # Find existing pinned status message
+        try:
+            channel = await self.fetch_channel(int(config.discord.channel_id))
+            if channel:
+                pins = await channel.pins()
+                # Look for the most recent pinned message from the bot
+                for pin in pins:
+                    if pin.author == self.user and pin.embeds:
+                        self.state['status_message_id'] = pin.id
+                        logger.info(f"Found existing pinned status message: {pin.id}")
+                        break
+        except Exception as error:
+            logger.log_error(error, {'operation': 'find_pinned_message'})
+        
         await self.check_status()
 
     async def on_error(self, event: str, *args, **kwargs):

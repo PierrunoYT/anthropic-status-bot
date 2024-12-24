@@ -86,7 +86,7 @@ LOGGING__DATE_FORMAT="%Y-%m-%d %H:%M:%S"                               # Date fo
 
 4. Run
 ```bash
-python src/index.py
+python start.py
 ```
 
 ## Hosting Service Deployment
@@ -95,7 +95,7 @@ python src/index.py
 1. Upload files to your server
 2. Set Python version to 3.9 or higher in server panel
 3. Create .env file with your configuration
-4. Start the bot using the control panel
+4. Start the bot using start.py or the control panel
 
 ### Other Hosting Services
 The bot is compatible with any Python hosting service that supports:

@@ -74,7 +74,16 @@ class AnthropicStatusBot(discord.Client):
             try:
                 message = await channel.send(embed=embed)
                 try:
+                    # Unpin old status messages from the bot (fallback case)
+                    pins = await channel.pins()
+                    for pin in pins:
+                        if pin.author == self.user and pin.embeds:
+                            await pin.unpin()
+                            logger.info(f"Unpinned old status message in fallback: {pin.id}")
+                    
+                    # Pin the new message
                     await message.pin(reason="Status message pinned for visibility")
+                    logger.info(f"Successfully pinned new message in fallback: {message.id}")
                 except discord.Forbidden:
                     logger.warn("Failed to pin message: Missing permissions")
                 return message.id

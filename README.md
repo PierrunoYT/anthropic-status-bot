@@ -72,7 +72,9 @@ The bot is compatible with any Python hosting service that supports:
 
 ## testing
 
-Run the test suite to verify embed formatting and functionality:
+Run the test suite to verify embed formatting and functionality. You have multiple options:
+
+1. Using pytest directly:
 ```bash
 # Activate virtual environment if not already active
 .\venv\Scripts\activate  # Windows
@@ -80,6 +82,15 @@ source venv/bin/activate  # Unix/MacOS
 
 # Run tests
 python -m pytest src/tests/test_bot.py -v
+```
+
+2. Using provided test runners:
+```bash
+# On Windows:
+.\run_tests.ps1
+
+# On Unix/MacOS:
+python run_test.py
 ```
 
 The test suite verifies:
@@ -96,6 +107,9 @@ The bot is built with:
 - requests - HTTP client
 - pydantic - Data validation
 - APScheduler - Task scheduling
+- python-dotenv - Environment variable management
+- tenacity - Retry handling
+- lxml - XML/HTML processing
 
 ## license
 

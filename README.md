@@ -10,10 +10,21 @@ discord bot that monitors anthropic's status page and provides real-time updates
   - Component-wise status with indented layout
   - Active incident tracking
   - Timestamp with divider line
-- incident notifications
-- component status tracking
-- robust error handling with exponential backoff retries
-- configurable monitoring for specific Anthropic components:
+- incident notifications with impact level tracking (minor/major/critical)
+- intelligent component status tracking:
+  - Duplicate detection with configurable expiry window
+  - Detailed state comparison and change detection
+  - Timestamp tracking for each component
+- robust error handling:
+  - Exponential backoff retry mechanism
+  - Configurable retry attempts and timeouts
+  - Comprehensive error logging
+- advanced monitoring capabilities:
+  - Configurable component filtering
+  - Custom user agent support
+  - Cache control
+  - Flexible HTML parsing with configurable selectors
+- monitored components:
   - console.anthropic.com
   - api.anthropic.com
   - api.anthropic.com - Beta Features

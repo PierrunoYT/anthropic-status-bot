@@ -16,7 +16,10 @@ class StatusConfig(BaseModel):
         "console.anthropic.com",
         "api.anthropic.com",
         "api.anthropic.com - Beta Features",
-        "anthropic.com"
+        "anthropic.com",
+        "claude.ai",
+        "Claude on Vertex AI",
+        "Claude on AWS Bedrock"
     ]
     user_agent: str = "AnthropicStatusBot/1.0"
 

@@ -5,6 +5,8 @@
 
 Discord bot that monitors Anthropic's status page and provides real-time updates.
 
+> 🔄 Python version of [peltae's Anthropic Status Bot](https://github.com/peltae/anthropic-status-bot) (originally in JavaScript)
+
 📦 **Repository:** [github.com/PierrunoYT/anthropic-status-bot](https://github.com/PierrunoYT/anthropic-status-bot)
 
 ---

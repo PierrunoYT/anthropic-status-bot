@@ -4,20 +4,20 @@ Discord bot that monitors Anthropic's status page and provides real-time updates
 
 ## Features
 
-- real-time status monitoring with in-place updates
-- live status dashboard with rich Discord embed formatting:
+- Real-time status monitoring with in-place updates
+- Live status dashboard with rich Discord embed formatting:
   - Color-coded status indicators (operational: green, degraded: yellow, outage: red)
   - Smart status dots (● for operational/resolved, ○ for issues)
   - Hierarchical component layout with proper indentation
   - Active incident tracking with impact levels
   - User-friendly timestamp formatting with divider line
   - Detailed incident updates with UTC timestamps
-- incident notifications with impact level tracking (minor/major/critical)
-- intelligent component status tracking:
+- Incident notifications with impact level tracking (minor/major/critical)
+- Intelligent component status tracking:
   - Duplicate detection with configurable expiry window
   - Detailed state comparison and change detection
   - Timestamp tracking for each component
-- robust error handling and logging:
+- Robust error handling and logging:
   - Exponential backoff retry mechanism
   - Configurable retry attempts and timeouts
   - Structured logging with detailed formatting
@@ -25,12 +25,12 @@ Discord bot that monitors Anthropic's status page and provides real-time updates
   - Error logging with context and stack traces
   - Multiple log levels (info, warn, error, debug)
   - UTC timestamp standardization
-- advanced monitoring capabilities:
+- Advanced monitoring capabilities:
   - Configurable component filtering
   - Custom user agent support
   - Cache control
   - Flexible HTML parsing with configurable selectors
-- monitored components:
+- Monitored components:
   - console.anthropic.com
   - api.anthropic.com
   - api.anthropic.com - Beta Features
@@ -43,7 +43,7 @@ Discord bot that monitors Anthropic's status page and provides real-time updates
 
 ## Local Setup
 
-1. clone and create virtual environment
+1. Clone and create virtual environment
 ```bash
 git clone https://github.com/peltae/anthropic-status-bot.git
 cd anthropic-status-bot
@@ -56,12 +56,12 @@ python -m venv venv
 source venv/bin/activate
 ```
 
-2. install dependencies
+2. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-3. configure
+3. Configure
 ```bash
 # copy example environment file
 cp .env.example .env
@@ -84,7 +84,7 @@ LOGGING__FORMAT="%(asctime)s - %(name)s - %(levelname)s - %(message)s"  # Log fo
 LOGGING__DATE_FORMAT="%Y-%m-%d %H:%M:%S"                               # Date format
 ```
 
-4. run
+4. Run
 ```bash
 python src/index.py
 ```
@@ -92,10 +92,10 @@ python src/index.py
 ## Hosting Service Deployment
 
 ### Sparked Host Setup
-1. upload files to your server
-2. set python version to 3.9 or higher in server panel
-3. create .env file with your configuration
-4. start the bot using the control panel
+1. Upload files to your server
+2. Set Python version to 3.9 or higher in server panel
+3. Create .env file with your configuration
+4. Start the bot using the control panel
 
 ### Other Hosting Services
 The bot is compatible with any Python hosting service that supports:

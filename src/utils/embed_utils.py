@@ -41,17 +41,21 @@ def create_status_embed(status: Dict[str, Any]) -> Embed:
         description=f"{get_status_dot(status['overall']['description'])} {format_status(status['overall']['description'])}",
         color=STATUS_COLORS.get(status_level, STATUS_COLORS['default'])
     )
-    
-    # Set footer with English format and divider
-    embed.set_footer(text=f"─────────────\nLast Updated • {now.strftime('%I:%M %p')}")
 
     # Add component statuses with proper spacing
-    component_status = "\n\n".join(
-        f"{get_status_dot(data['status'])} {format_name(name)}\n└─ {format_status(data['status'])}"
-        for name, data in status['components'].items()
-    )
-    if component_status:
-        embed.add_field(name="components", value=component_status, inline=False)
+    components_text = []
+    for name, data in status['components'].items():
+        components_text.append(f"{get_status_dot(data['status'])} {format_name(name)}\n└─ {format_status(data['status'])}")
+    
+    if components_text:
+        embed.add_field(
+            name="components",
+            value="\n\n".join(components_text),
+            inline=False
+        )
+    
+    # Set footer with divider and timestamp
+    embed.set_footer(text=f"─────────────\nLast Updated • {now.strftime('%I:%M %p')}")
 
     return embed
 

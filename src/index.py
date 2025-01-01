@@ -14,7 +14,6 @@ class AnthropicStatusBot(discord.Client):
         self.status_checker = StatusChecker()
         self.state = {
             'status_message_id': None,
-            'incident_messages': {},
             'last_message_time': 0
         }
         self.RATE_LIMIT_DELAY = 1.0  # 1 second between messages
@@ -109,23 +108,6 @@ class AnthropicStatusBot(discord.Client):
             if new_message_id != self.state['status_message_id']:
                 logger.info(f"Status message ID changed: {self.state['status_message_id']} -> {new_message_id}")
             self.state['status_message_id'] = new_message_id
-
-            # Handle incident updates
-            if updates and isinstance(updates, list):
-                # Skip if this is just the initial status
-                if len(updates) == 1 and updates[0].get('type') == 'initial':
-                    return
-                    
-                # Process incident updates
-                for update in updates:
-                    if update.get('type') in ['new_incident', 'incident_update']:
-                        message_id = await self.update_message(
-                            channel,
-                            self.state['incident_messages'].get(update['incident']['id']),
-                            create_incident_embed(update['incident'])
-                        )
-                        if message_id:
-                            self.state['incident_messages'][update['incident']['id']] = message_id
 
         except Exception as error:
             logger.log_error(error, {'operation': 'handle_status_update'})
